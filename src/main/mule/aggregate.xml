@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="5f2c3207-d9f7-473d-bd55-790f4c7959ee" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="c9379e87-9759-4265-9208-831655eda709" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.database}" />
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="dd19354e-5ac0-48b5-8258-542a6089583d" file="prop.yaml" />
+	<flow name="exceltoJSONFlow" doc:id="6cf173eb-651e-4e9f-ae79-10baca2c8d0f" >
+		<scheduler doc:name="Scheduler" doc:id="a7da66bc-b106-41e0-8b6a-1e50bf455ef2" >
+			<scheduling-strategy >
+				<fixed-frequency />
+			</scheduling-strategy>
+		</scheduler>
+		<file:read doc:name="Read" doc:id="9f6fbf91-a5f8-4223-8e76-6ab3db2ba1d1" path="${fttp.path}" outputMimeType="application/xlsx" config-ref="File_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="84cd4b82-9e57-41eb-95ee-0c5ad77a1f95" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="wholeFileData" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="sheets" ><![CDATA[%dw 2.0
+output application/java
+---
+payload pluck $$]]></ee:set-variable>
+				<ee:set-variable variableName="data" ><![CDATA[%dw 2.0
+output application/java
+---
+payload pluck $]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="b8ca79e2-dc6b-4fc4-b9c7-74da0ff8d148" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.data[0] map (emp) ->
+  {
+    EmpId: emp.id as Number,
+    empName: emp.name,
+    empAge: emp.age as String,
+    empAddress:emp.address,
+    
+    (vars.data[1] filter ($.*id contains emp.id) map (qual) -> {
+      'empQualfication': qual.Qualfication
+    }),
+    (vars.data[2] filter ($.*id contains emp.id) map (gen) -> {
+      'Gender': gen.gender
+    })
+  }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<try doc:name="Try" doc:id="156b79fb-4bdc-40ab-979f-8d70f56eb44f" >
+			<db:bulk-insert doc:name="Bulk insert" doc:id="4f24b7d9-bb18-41dc-b66e-570554c93de1" config-ref="Database_Config">
+			<db:bulk-input-parameters><![CDATA[#[output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	EmpId: payload01.EmpId,
+	empName: payload01.empName,
+	empAge: payload01.empAge,
+	empAddress: payload01.empAddress,
+	empQualfication: payload01.empQualfication,
+	Gender: payload01.Gender
+}]]]></db:bulk-input-parameters>
+			<db:sql><![CDATA[insert into aggregate.mergeExcel(EmpId,empName,empAge,empAddress,empQualfication,Gender)
+values (:EmpId,:empName,:empAge,:empAddress,:empQualfication,:Gender)
+]]></db:sql>
+		</db:bulk-insert>
+			<error-handler>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="23b3218a-dc77-42fe-92f3-2886cc27ac39" type="DB:QUERY_EXECUTION">
+					<ee:transform doc:name="Transform Message" doc:id="629ada14-afaf-4f7b-b66d-c3871614403f" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"ID duplicate "
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</on-error-continue>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="3955b017-430e-452a-9909-e7d399d3a853" type="DB:CONNECTIVITY">
+					<ee:transform doc:name="Transform Message" doc:id="6d3c1396-2dfe-4ecf-8c64-53da564906ea" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"check DB connectivity"
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</on-error-continue>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="b199ba55-ae60-4a42-8fac-c11660fe0b5e" type="ANY">
+					<ee:transform doc:name="Transform Message" doc:id="a7966851-97ce-4697-82f0-0193e2e5dac9" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"database connection "
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="Logger" doc:id="039888b4-3a2d-46ce-b632-65458cb99847" message="#[payload]"/>
+	</flow>
+</mule>

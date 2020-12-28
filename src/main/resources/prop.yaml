@@ -1,0 +1,11 @@
+fttp:
+  path: "C:/Users/tesfa/git/repository/onboarding/merging-excelpayload/src/main/resources/inputData/Emp.xlsx"
+
+db:
+  host: "database-1.cak1qyiecn3r.us-west-1.rds.amazonaws.com"
+  port: "3306"
+  user: "admin"
+  password: "daniboy123"
+  database: "aggregate"
+  
+  

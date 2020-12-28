@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="in" format="json">
+      <types:shape format="weave" example="input.json"><![CDATA[%dw 2.0
+
+type in = Array<{|  EmpId: Number {"typeId": "int"},   empName: String,   empAge: String,   empAddress: String,   empQualfication: String,   Gender: String|}> {"example": "[{\\\"EmpId\\\":1,\\\"empName\\\":\\\"Daniel\\\",\\\"empAge\\\":\\\"42\\\",\\\"empAddress\\\":\\\"Asmara\\\",\\\"empQualfication\\\":\\\"MS\\\",\\\"Gender\\\":\\\"M\\\"},{\\\"EmpId\\\":2,\\\"empName\\\":\\\"Samuel\\\",\\\"empAge\\\":\\\"30\\\",\\\"empAddress\\\":\\\"Dekemhare\\\",\\\"empQualfication\\\":\\\"PHD\\\",\\\"Gender\\\":\\\"M\\\"},{\\\"EmpId\\\":3,\\\"empName\\\":\\\"Kidane\\\",\\\"empAge\\\":\\\"20\\\",\\\"empAddress\\\":\\\"Barentu\\\",\\\"empQualfication\\\":\\\"BSC\\\",\\\"Gender\\\":\\\"M\\\"},{\\\"EmpId\\\":4,\\\"empName\\\":\\\"Saba\\\",\\\"empAge\\\":\\\"52\\\",\\\"empAddress\\\":\\\"Mainefhi\\\",\\\"empQualfication\\\":\\\"BA\\\",\\\"Gender\\\":\\\"F\\\"},{\\\"EmpId\\\":5,\\\"empName\\\":\\\"Adiam\\\",\\\"empAge\\\":\\\"33\\\",\\\"empAddress\\\":\\\"Las Vegas\\\",\\\"empQualfication\\\":\\\"Diploma\\\",\\\"Gender\\\":\\\"F\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="out" format="json">
+      <types:shape format="weave" example="out.json"><![CDATA[%dw 2.0
+
+type out = Array<{|  EmpId: Number {"typeId": "int"},   empName: String,   empAge: String,   empAddress: String,   empQualfication: String,   Gender: String|}> {"example": "[{\\\"EmpId\\\":1,\\\"empName\\\":\\\"Daniel\\\",\\\"empAge\\\":\\\"42\\\",\\\"empAddress\\\":\\\"Asmara\\\",\\\"empQualfication\\\":\\\"MS\\\",\\\"Gender\\\":\\\"M\\\"},{\\\"EmpId\\\":2,\\\"empName\\\":\\\"Samuel\\\",\\\"empAge\\\":\\\"30\\\",\\\"empAddress\\\":\\\"Dekemhare\\\",\\\"empQualfication\\\":\\\"PHD\\\",\\\"Gender\\\":\\\"M\\\"},{\\\"EmpId\\\":3,\\\"empName\\\":\\\"Kidane\\\",\\\"empAge\\\":\\\"20\\\",\\\"empAddress\\\":\\\"Barentu\\\",\\\"empQualfication\\\":\\\"BSC\\\",\\\"Gender\\\":\\\"M\\\"},{\\\"EmpId\\\":4,\\\"empName\\\":\\\"Saba\\\",\\\"empAge\\\":\\\"52\\\",\\\"empAddress\\\":\\\"Mainefhi\\\",\\\"empQualfication\\\":\\\"BA\\\",\\\"Gender\\\":\\\"F\\\"},{\\\"EmpId\\\":5,\\\"empName\\\":\\\"Adiam\\\",\\\"empAge\\\":\\\"33\\\",\\\"empAddress\\\":\\\"Las Vegas\\\",\\\"empQualfication\\\":\\\"Diploma\\\",\\\"Gender\\\":\\\"F\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#a0a42330-1787-4afd-852e-fee384ae839c">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="in"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="in"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#4f24b7d9-bb18-41dc-b66e-570554c93de1">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="in"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="bulkInputParameters" type="out"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+</types:mule>

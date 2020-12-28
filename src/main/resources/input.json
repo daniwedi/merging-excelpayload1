@@ -1,0 +1,41 @@
+[{
+    "EmpId": 1,
+    "empName": "Daniel",
+    "empAge": "42",
+    "empAddress": "Asmara",
+    "empQualfication": "MS",
+    "Gender": "M"
+  },
+  {
+    "EmpId": 2,
+    "empName": "Samuel",
+    "empAge": "30",
+    "empAddress": "Dekemhare",
+    "empQualfication": "PHD",
+    "Gender": "M"
+  },
+  {
+    "EmpId": 3,
+    "empName": "Kidane",
+    "empAge": "20",
+    "empAddress": "Barentu",
+    "empQualfication": "BSC",
+    "Gender": "M"
+  },
+  {
+    "EmpId": 4,
+    "empName": "Saba",
+    "empAge": "52",
+    "empAddress": "Mainefhi",
+    "empQualfication": "BA",
+    "Gender": "F"
+  },
+  {
+    "EmpId": 5,
+    "empName": "Adiam",
+    "empAge": "33",
+    "empAddress": "Las Vegas",
+    "empQualfication": "Diploma",
+    "Gender": "F"
+  }
+]
